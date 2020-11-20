@@ -3,10 +3,11 @@
         <label for="name">Name to be displayed</label>
         <input type="text" class="name" placeholder="" v-model="info.name"/>
         <label for="zipcode">Zipcode for weather</label>
-        <input type="text" class="zipcode" placeholder="98125" v-model="zipcode"/>
+        <input type="text" class="zipcode" placeholder="98125" v-model="info.zipcode"/>
         <label for="links">Links on your homepage</label>
         <input type="text" class="links" placeholder="youtube.com"/>
-
+    {{info.date}}
+     {{info.time}}
 
     </div>
     <DisplayPage info="info" :render="inputRecieved"/>
@@ -23,30 +24,38 @@
         data () {
           return {
             inputRecieved: false,
-            zipcode: '',
             info: {
               name: '',
-              date: '',
-              time: '',
+              zipcode: '',
+              date: new Date().toDateString(),
+              time: ' ',
               weather: {
 
               },
               links: [
 
               ],
+              linkFavicons: [
+
+              ],
               background: ''
-            }
+            } || JSON.parse(localStorage.getItem("usersInfo"))
           }
         },
+        mounted : function() {           
+            setInterval(() => {
+                this.info.time = new Date().toLocaleTimeString();
+            }, 1000);
+        },
         methods: {
-            // fetchWeather (e) {
-            //   fetch("https")
-            // },
-            // fetchFavicons () {
-
-            // },
-            // savePreferences () {
-                //save to browser cache and change inputRecieved
+            // fetchWeatherFaviconsAndSave: () => {
+            //     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.zipcode}&appid=${process.env.VUE_APP_WEATHER_API}`)
+            //       .then(response => response.json())
+            //       .then(data => this.info.weather = data)
+            //     fetch(`http://favicongrabber.com/api/grab/${this.info.link}`)
+            //       .then(response => response.json())
+            //       .then(data => this.info.linkFavicons = data.icons[0].src)
+            //     localStorage.setItem("usersInfo", JSON.stringify(this.info));
             // }
         }
     }
