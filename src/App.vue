@@ -1,23 +1,39 @@
 <template>
     <div class="inputPage" v-if="!info.inputRecieved">
-        <h1>Welcome to the homepage creator</h1>
-        <h2>Input your info here</h2>
-        <label for="name">Name to be displayed</label>
+        <h1 class="inputHeader">Welcome to the Homepage Creator</h1>
+        <!-- <h2>Please provide info here</h2> -->
+        <label for="name">Display name</label>
         <input type="text" class="name" placeholder="" v-model="info.name"/>
 
-        <label for="zipcode">Zipcode for weather</label>
+        <label for="zipcode">Zip code for weather</label>
         <input type="text" class="zipcode" placeholder="98125" v-model="info.zipcode"/>
 
-        <h2>Input your pref here</h2>
+        <!-- <h2>Input your pref here</h2> -->
         <label for="backgroundPref">Background Preference</label>
         <select name="backgroundPref" id="backgroundPref" v-model="info.background">
           <option value="Forest">Forest</option>
           <option value="Mountain">Mountain</option>
           <option value="Beach">Beach</option>
+          <option value="Lake">Lake</option>
         </select>
-        <label for="addShortcut">Add Shortcut</label>
-        <button name="addShortcut" class="addShortcut" v-on:click="addShortcut"><i class="fas fa-plus fa-3x"></i></button>
+        
+        <button class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
+
+        <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
+            <div class="modalContent">
+                <h3>Add Shortcut</h3>
+                <label for="shortcutName">Name</label>
+                <input type="text" class="shortcutName" v-model="tempShortcutName"/>
+
+                <label for="shortcutURL">Full URL</label>
+                <input type="text" class="shortcutURL" placeholder="https://www.youtube.com" v-model="tempShortcutURL"/>
+                <button class="shortcutDone" v-on:click="addShortcut">Done</button>
+                <button class="shortcutCancel" value="shortcutCancel" v-on:click="onClick">Cancel</button>
+            </div>
+        </div>
+
         <button class="save" v-on:click="fetchFaviconsAndSave">Save and Render</button>
+        {{info}}
     </div>
     <div class="displayPage" v-if="info.inputRecieved">
         <h1 class="greeting">Hi, {{info.name}}</h1>
@@ -39,17 +55,20 @@
           return {
             date: new Date().toDateString(),
             time: '',
-            weather: "",
+            weather: {},
+            tempShortcutName: '',
+            tempShortcutURL: '',
+            tempShortcutFavicon: '',
             info: {
               inputRecieved: false,
               name: '',
               zipcode: '',
-              links: {},
+              links: [],
               background: ''
             }
           }
         },
-        mounted : function() {
+        mounted: function() {
             setInterval(() => {
                 this.time = new Date().toLocaleTimeString();
             }, 1000);
@@ -57,13 +76,18 @@
             if (JSON.parse(localStorage.getItem("info"))) {
               this.info = JSON.parse(localStorage.getItem("info"))
             }
+
+            window.addEventListener('click', this.onClick);
             // if (this.info.zipcode.length === 5 ) {
             //     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&appid=${process.env.VUE_APP_WEATHER_API}`)
             //         .then(response => response.json())
             //         .then(data => this.info.weather = data)
             // } 
         },
-        // updated: () => {
+        beforeUnmount: function() {
+            window.removeEventListener('click', this.onClick);
+        },
+        // updated: function() {
             // if (this.info.zipcode.length === 5 ) {
             //     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&appid=${process.env.VUE_APP_WEATHER_API}`)
             //         .then(response => response.json())
@@ -72,30 +96,72 @@
         // },
         methods: {
             fetchFaviconsAndSave: function() {
-                // fetch(`http://favicongrabber.com/api/grab/${this.info.link}`)
-                //     .then(response => response.json())
-                //     .then(data => this.info.linkFavicons = data.icons[0].src)
                 this.info.inputRecieved = true
                 localStorage.setItem("info", JSON.stringify(this.info));
             },
             switchToEdit: function() {
               this.info.inputRecieved = false
+            },
+            addShortcut: function() {
+              let fetchEndpoint = this.tempShortcutURL.substring(12, this.tempShortcutURL.length);
+              console.log(fetchEndpoint)
+
+              // fetch(`http://favicongrabber.com/api/grab/${fetchEndpoint}`)
+              //       .then(response => response.json())
+              //       .then(data => {console.log(this.tempShortcutFavicon); this.tempShortcutFavicon = data.icons[0].src})
+              console.log(this.info)
+              this.info.links.push({id: this.info.links.length, name: this.tempShortcutName, url: this.tempShortcutURL})
+            },
+            onClick: function(event) {
+              if(event.target == this.$refs["shortcutModal"] || event.target.value == "shortcutCancel") {
+                this.$refs["shortcutModal"].style.display = "none";
+              }
+            },
+            displayShortcutModal: function() {
+                this.tempShortcutName = "";
+                this.tempShortcutURL = "";
+                this.tempShortcutFavicon = "";
+                this.$refs["shortcutModal"].style.display = "block";
             }
         }
     }
 </script>
 
 <style>
+    body {
+      background: linear-gradient(90deg, rgb(0, 0, 0) 0%, rgb(52, 0, 87) 50%, rgb(0, 0, 0, 1) 100%);
+    }
     #app {
-        font-family: Avenir, Helvetica, Arial, sans-serif;
+        font-family: 'Montserrat', sans-serif !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-align: center;
-        color: #2c3e50;
-        margin-top: 60px;
+        color: white;
     }
-    label, input {
-      display: flex;
-      margin: 30px;
+    .inputHeader {
+      font-family: 'Montserrat', sans-serif !important;
+      margin: 50px;
+      font-size: 40px;
     }
+    .shortcutModal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      padding-top: 100px; /* Location of the box */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.75); /* Black w/ opacity */
+    }
+    .modalContent {
+  background-color: white;
+  color: black;
+  margin: auto;
+  padding: 20px;
+  border-radius: 25px;
+  width: 50%;
+}
 </style>
