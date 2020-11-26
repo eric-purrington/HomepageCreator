@@ -1,14 +1,13 @@
 <template>
     <div class="inputPage" v-if="!info.inputRecieved">
-        <h1 class="inputHeader">Welcome to the Homepage Creator</h1>
-        <!-- <h2>Please provide info here</h2> -->
+        <h1 class="inputHeader">Homepage Creator</h1>
+
         <label for="name">Display name</label>
-        <input type="text" class="name" placeholder="" v-model="info.name"/>
+        <input type="text" class="name" v-model="info.name"/>
 
         <label for="zipcode">Zip code for weather</label>
-        <input type="text" class="zipcode" placeholder="98125" v-model="info.zipcode"/>
+        <input type="text" class="zipcode" v-model="info.zipcode"/>
 
-        <!-- <h2>Input your pref here</h2> -->
         <label for="backgroundPref">Background Preference</label>
         <select name="backgroundPref" id="backgroundPref" v-model="info.background">
           <option value="Forest">Forest</option>
@@ -26,7 +25,7 @@
                 <input type="text" class="shortcutName" v-model="tempShortcutName"/>
 
                 <label for="shortcutURL">Full URL</label>
-                <input type="text" class="shortcutURL" placeholder="https://www.youtube.com" v-model="tempShortcutURL"/>
+                <input type="text" class="shortcutURL" placeholder="www.youtube.com" v-model="tempShortcutURL"/>
                 <button class="shortcutDone" v-on:click="addShortcut">Done</button>
                 <button class="shortcutCancel" value="shortcutCancel" v-on:click="onClick">Cancel</button>
             </div>
@@ -37,6 +36,10 @@
     </div>
     <div class="displayPage" v-if="info.inputRecieved">
         <h1 class="greeting">Hi, {{info.name}}</h1>
+
+        <div class="shortcutCard" v-if="info.links.length == 1">
+            <h1>{{info.links[0].name}}</h1>
+        </div>
         <button class="edit" v-on:click="switchToEdit">Edit your page</button>
 
     </div>
@@ -103,14 +106,20 @@
               this.info.inputRecieved = false
             },
             addShortcut: function() {
-              let fetchEndpoint = this.tempShortcutURL.substring(12, this.tempShortcutURL.length);
-              console.log(fetchEndpoint)
+              let fullURL = "https://" + this.tempShortcutURL
+              let fetchEndpoint = fullURL.substring(12, fullURL.length);
 
-              // fetch(`http://favicongrabber.com/api/grab/${fetchEndpoint}`)
-              //       .then(response => response.json())
-              //       .then(data => {console.log(this.tempShortcutFavicon); this.tempShortcutFavicon = data.icons[0].src})
-              console.log(this.info)
-              this.info.links.push({id: this.info.links.length, name: this.tempShortcutName, url: this.tempShortcutURL})
+              fetch(`http://favicongrabber.com/api/grab/${fetchEndpoint}`)
+                    .then(response => response.json())
+                    .then(data => this.tempShortcutFavicon = data.icons[0].src)
+                    .then(() => {
+                        if (this.info.links.length === undefined) {
+                            this.info.links = [{"id": 0, "name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon}]
+                        } else {
+                            this.info.links.push({"id": this.info.links.length, "name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
+                        }
+                        this.$refs["shortcutModal"].style.display = "none";
+                    })
             },
             onClick: function(event) {
               if(event.target == this.$refs["shortcutModal"] || event.target.value == "shortcutCancel") {
@@ -128,8 +137,10 @@
 </script>
 
 <style>
-    body {
-      background: linear-gradient(90deg, rgb(0, 0, 0) 0%, rgb(52, 0, 87) 50%, rgb(0, 0, 0, 1) 100%);
+    html {
+      /* background: linear-gradient(90deg, rgb(0, 0, 0) 0%, rgb(52, 0, 87) 50%, rgb(0, 0, 0, 1) 100%); */
+      height: 100%;
+      background: radial-gradient(rgb(0, 0, 0), rgb(129, 0, 133), rgb(0, 0, 0, 1));
     }
     #app {
         font-family: 'Montserrat', sans-serif !important;
@@ -139,29 +150,29 @@
         color: white;
     }
     .inputHeader {
-      font-family: 'Montserrat', sans-serif !important;
-      margin: 50px;
-      font-size: 40px;
+        font-family: 'Montserrat', sans-serif !important;
+        margin: 50px;
+        font-size: 40px;
     }
     .shortcutModal {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1; /* Sit on top */
-      padding-top: 100px; /* Location of the box */
-      left: 0;
-      top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgb(0,0,0); /* Fallback color */
-      background-color: rgba(0,0,0,0.75); /* Black w/ opacity */
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.75); /* Black w/ opacity */
     }
     .modalContent {
-  background-color: white;
-  color: black;
-  margin: auto;
-  padding: 20px;
-  border-radius: 25px;
-  width: 50%;
-}
+        background-color: white;
+        color: black;
+        margin: auto;
+        padding: 20px;
+        border-radius: 25px;
+        width: 50%;
+    }
 </style>
