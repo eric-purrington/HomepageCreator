@@ -15,8 +15,41 @@
           <option value="Beach">Beach</option>
           <option value="Lake">Lake</option>
         </select>
+
+        <div class="shortcutCard" v-if="info.links.length == 1">
+            <h3>{{info.links[0].name}}</h3><i v-on:click="updateOrDeleteShortcut" :id="info.links[0].name" class="fas fa-ellipsis-v"></i>
+            <img :src="info.links[0].favicon" :alt="info.links[0].name + ' favicon'" />
+
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 2">
+            <h1>{{info.links[1].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 3">
+            <h1>{{info.links[2].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 4">
+            <h1>{{info.links[3].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 5">
+            <h1>{{info.links[4].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 6">
+            <h1>{{info.links[5].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 7">
+            <h1>{{info.links[6].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 8">
+            <h1>{{info.links[7].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 9">
+            <h1>{{info.links[8].name}}</h1>
+        </div>
+        <div class="shortcutCard" v-if="info.links.length == 10">
+            <h1>{{info.links[9].name}}</h1>
+        </div>
         
-        <button class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
+        <button v-if="info.links.length == 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
 
         <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
             <div class="modalContent">
@@ -114,9 +147,9 @@
                     .then(data => this.tempShortcutFavicon = data.icons[0].src)
                     .then(() => {
                         if (this.info.links.length === undefined) {
-                            this.info.links = [{"id": 0, "name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon}]
+                            this.info.links = [{"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon}]
                         } else {
-                            this.info.links.push({"id": this.info.links.length, "name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
+                            this.info.links.push({"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
                         }
                         this.$refs["shortcutModal"].style.display = "none";
                     })
@@ -131,6 +164,9 @@
                 this.tempShortcutURL = "";
                 this.tempShortcutFavicon = "";
                 this.$refs["shortcutModal"].style.display = "block";
+            },
+            updateOrDeleteShortcut: function() {
+                
             }
         }
     }
@@ -174,5 +210,10 @@
         padding: 20px;
         border-radius: 25px;
         width: 50%;
+    }
+    .fa-ellipsis-v {
+      position: relative;
+      top: -60px;
+      right: -100px;
     }
 </style>
