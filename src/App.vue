@@ -2,6 +2,7 @@
     <div class="inputPage" v-if="!info.inputRecieved">
         <h1 class="inputHeader">Homepage Creator</h1>
 
+        <!-- INPUT AREA -->
         <label for="name">Display name</label>
         <input type="text" class="name" v-model="info.name"/>
 
@@ -16,39 +17,53 @@
           <option value="Lake">Lake</option>
         </select>
 
-        <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
-          <i v-on:click="updateOrDeleteShortcut" :id="shortcut.name" class="fas fa-ellipsis-v"></i>
-          <a :href="shortcut.url">
-            <div>
-              <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
-              <h3>{{shortcut.name}}</h3>
+        <!-- SHORTCUT AREA -->
+        <div class="shortcutSection">
+            <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
+                <div class="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                    <div class="dropdownContent">
+                      <a href="#" :id="shortcut.name" v-on:click="removeShortcut">Remove</a>
+                      <a href="#" :id="shortcut.name" v-on:click="displayEditShortcut">Edit</a>
+                    </div>
+                </div>
+                <a :href="shortcut.url">
+                    <div>
+                        <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
+                        <h3>{{shortcut.name}}</h3>
+                    </div>
+                </a>
             </div>
-          </a>
-        </div>
         
-        <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
+            <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
+        </div>
 
         <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
             <div class="modalContent">
-                <h3>Add Shortcut</h3>
+                <h3 v-if="!tempEdit">Add Shortcut</h3>
+                <h3 v-if="tempEdit">Edit Shortcut</h3>
                 <label for="shortcutName">Name</label>
                 <input type="text" class="shortcutName" v-model="tempShortcutName"/>
 
-                <label for="shortcutURL">Full URL</label>
+                <label for="shortcutURL">URL</label>
                 <input type="text" class="shortcutURL" placeholder="www.youtube.com" v-model="tempShortcutURL"/>
-                <button class="shortcutDone" v-on:click="addShortcut">Done</button>
+
+                <button class="shortcutDone" v-on:click="addOrEditShortcut">Done</button>
+
                 <button class="shortcutCancel" value="shortcutCancel" v-on:click="onClick">Cancel</button>
             </div>
         </div>
 
-        <button class="save" v-on:click="fetchFaviconsAndSave">Save and Render</button>
+        <button class="save" v-on:click="saveAndRender">Save and Render</button>
         {{info}}
     </div>
+
+
     <div class="displayPage" v-if="info.inputRecieved">
         <h1 class="greeting">Hi, {{info.name}}</h1>
 
         <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
-          <i v-on:click="updateOrDeleteShortcut" :id="shortcut.name" class="fas fa-ellipsis-v"></i>
+          <!-- <i v-on:click="updateOrDeleteShortcut" :id="shortcut.name" class="fas fa-ellipsis-v"></i> -->
           <a :href="shortcut.url">
             <div>
               <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
@@ -60,22 +75,18 @@
         <button class="edit" v-on:click="switchToEdit">Edit your page</button>
 
     </div>
-    <!-- <DisplayPage info="info" :render="inputRecieved"/> -->
 </template>
 
 <script>
-    // import DisplayPage from './components/DisplayPage.vue'
-
     export default {
         name: 'App',
-        // components: {
-        //     DisplayPage
-        // },
         data () {
           return {
             date: new Date().toDateString(),
             time: '',
             weather: {},
+            tempEdit: false,
+            tempIndexToEdit: 0,
             tempShortcutName: '',
             tempShortcutURL: '',
             tempShortcutFavicon: '',
@@ -115,14 +126,14 @@
             // } 
         // },
         methods: {
-            fetchFaviconsAndSave: function() {
+            saveAndRender: function() {
                 this.info.inputRecieved = true
                 localStorage.setItem("info", JSON.stringify(this.info));
             },
             switchToEdit: function() {
               this.info.inputRecieved = false
             },
-            addShortcut: function() {
+            addOrEditShortcut: function() {
               let fullURL = "https://" + this.tempShortcutURL
               let fetchEndpoint = fullURL.substring(12, fullURL.length);
 
@@ -130,18 +141,21 @@
                     .then(response => response.json())
                     .then(data => this.tempShortcutFavicon = data.icons[0].src)
                     .then(() => {
-                        if (this.info.links.length === undefined) {
+                        if (this.info.links.length === undefined && this.tempEdit === false) {
                             this.info.links = [{"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon}]
-                        } else {
+                        } else if (this.info.links.length !== undefined && this.tempEdit === false){
                             this.info.links.push({"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
+                        } else if (this.tempEdit === true) {
+                            this.info.links.splice(this.tempIndexToEdit, 1, {"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
                         }
+                        this.tempEdit = false
                         this.$refs["shortcutModal"].style.display = "none";
                     })
             },
             onClick: function(event) {
-              if(event.target == this.$refs["shortcutModal"] || event.target.value == "shortcutCancel") {
-                this.$refs["shortcutModal"].style.display = "none";
-              }
+                if(event.target == this.$refs["shortcutModal"] || event.target.value == "shortcutCancel") {
+                    this.$refs["shortcutModal"].style.display = "none";
+                }
             },
             displayShortcutModal: function() {
                 this.tempShortcutName = "";
@@ -149,8 +163,16 @@
                 this.tempShortcutFavicon = "";
                 this.$refs["shortcutModal"].style.display = "block";
             },
-            updateOrDeleteShortcut: function() {
-
+            displayEditShortcut: function(event) {
+                this.tempIndexToEdit = this.info.links.findIndex(i => i.name === event.target.id);
+                this.tempEdit = true
+                this.displayShortcutModal()
+                this.tempShortcutName = event.target.id;
+                this.tempShortcutURL = this.info.links[this.tempIndexToEdit].url.substring(8, this.info.links[this.tempIndexToEdit].url.length);
+            },
+            removeShortcut: function(event) {
+                let indexToRemove = this.info.links.findIndex(i => i.name === event.target.id);
+                this.info.links.splice(indexToRemove, 1);
             }
         }
     }
@@ -158,9 +180,9 @@
 
 <style>
     html {
-      /* background: linear-gradient(90deg, rgb(0, 0, 0) 0%, rgb(52, 0, 87) 50%, rgb(0, 0, 0, 1) 100%); */
+      background: linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%);
       height: 100%;
-      background: radial-gradient(rgb(0, 0, 0), rgb(129, 0, 133), rgb(0, 0, 0, 1));
+      /* background: radial-gradient(rgb(0, 0, 0), rgb(0, 255, 55), rgb(0, 0, 0, 1)); */
     }
     #app {
         font-family: 'Montserrat', sans-serif !important;
@@ -194,5 +216,26 @@
         padding: 20px;
         border-radius: 25px;
         width: 50%;
+    }
+    .shortcutCard {
+      display: inline-block;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdownContent {
+      display: none;
+      position: absolute;
+      background-color: #f1f1f1;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+    .fa-ellipsis-v:hover {
+      cursor: pointer;
+    }
+    .dropdown:hover .dropdownContent{
+      display: block;
     }
 </style>
