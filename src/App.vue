@@ -16,40 +16,17 @@
           <option value="Lake">Lake</option>
         </select>
 
-        <div class="shortcutCard" v-if="info.links.length == 1">
-            <h3>{{info.links[0].name}}</h3><i v-on:click="updateOrDeleteShortcut" :id="info.links[0].name" class="fas fa-ellipsis-v"></i>
-            <img :src="info.links[0].favicon" :alt="info.links[0].name + ' favicon'" />
-
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 2">
-            <h1>{{info.links[1].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 3">
-            <h1>{{info.links[2].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 4">
-            <h1>{{info.links[3].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 5">
-            <h1>{{info.links[4].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 6">
-            <h1>{{info.links[5].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 7">
-            <h1>{{info.links[6].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 8">
-            <h1>{{info.links[7].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 9">
-            <h1>{{info.links[8].name}}</h1>
-        </div>
-        <div class="shortcutCard" v-if="info.links.length == 10">
-            <h1>{{info.links[9].name}}</h1>
+        <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
+          <i v-on:click="updateOrDeleteShortcut" :id="shortcut.name" class="fas fa-ellipsis-v"></i>
+          <a :href="shortcut.url">
+            <div>
+              <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
+              <h3>{{shortcut.name}}</h3>
+            </div>
+          </a>
         </div>
         
-        <button v-if="info.links.length == 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
+        <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
 
         <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
             <div class="modalContent">
@@ -70,9 +47,16 @@
     <div class="displayPage" v-if="info.inputRecieved">
         <h1 class="greeting">Hi, {{info.name}}</h1>
 
-        <div class="shortcutCard" v-if="info.links.length == 1">
-            <h1>{{info.links[0].name}}</h1>
+        <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
+          <i v-on:click="updateOrDeleteShortcut" :id="shortcut.name" class="fas fa-ellipsis-v"></i>
+          <a :href="shortcut.url">
+            <div>
+              <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
+              <h3>{{shortcut.name}}</h3>
+            </div>
+          </a>
         </div>
+
         <button class="edit" v-on:click="switchToEdit">Edit your page</button>
 
     </div>
@@ -166,7 +150,7 @@
                 this.$refs["shortcutModal"].style.display = "block";
             },
             updateOrDeleteShortcut: function() {
-                
+
             }
         }
     }
@@ -210,10 +194,5 @@
         padding: 20px;
         border-radius: 25px;
         width: 50%;
-    }
-    .fa-ellipsis-v {
-      position: relative;
-      top: -60px;
-      right: -100px;
     }
 </style>
