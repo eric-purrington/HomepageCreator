@@ -15,6 +15,7 @@
           <option value="Mountain">Mountain</option>
           <option value="Beach">Beach</option>
           <option value="Lake">Lake</option>
+          <option value="Random">Random</option>
         </select>
 
         <!-- SHORTCUT AREA -->
@@ -108,6 +109,12 @@
               this.info = JSON.parse(localStorage.getItem("info"))
             }
 
+            if (this.info.background !== "" && this.info.inputRecieved) {
+                document.body.style.backgroundImage = 'url("assets/logo.png")';
+            } else {
+                document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
+            }
+
             window.addEventListener('click', this.onClick);
             // if (this.info.zipcode.length === 5 ) {
             //     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&appid=${process.env.VUE_APP_WEATHER_API}`)
@@ -118,13 +125,21 @@
         beforeUnmount: function() {
             window.removeEventListener('click', this.onClick);
         },
-        // updated: function() {
+        updated: function() {
+            if (this.info.background !== "" && this.info.inputRecieved) {
+                console.log("were in")
+                document.body.style.backgroundImage = 'url("https://unsplash.com/photos/tvleqH3p1os")';
+                // document.body.style.backgroundSize = "cover";
+                // background-size: cover;
+            } else {
+                document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
+            }
             // if (this.info.zipcode.length === 5 ) {
             //     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&appid=${process.env.VUE_APP_WEATHER_API}`)
             //         .then(response => response.json())
             //         .then(data => this.info.weather = data)
             // } 
-        // },
+        },
         methods: {
             saveAndRender: function() {
                 this.info.inputRecieved = true
@@ -179,10 +194,10 @@
 </script>
 
 <style>
-    html {
-      background: linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%);
+    html, body {
       height: 100%;
-      /* background: radial-gradient(rgb(0, 0, 0), rgb(0, 255, 55), rgb(0, 0, 0, 1)); */
+      margin: 0px !important;
+      overflow: hidden;
     }
     #app {
         font-family: 'Montserrat', sans-serif !important;
@@ -238,4 +253,7 @@
     .dropdown:hover .dropdownContent{
       display: block;
     }
+    /* .displayPage {
+      background-image: url("./assets/logo.png");
+    } */
 </style>
