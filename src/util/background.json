@@ -1,60 +1,60 @@
 [
     {
         "category": "Mountain",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "mountain1.jpg",
+        "photographer": "Errin Casano"
     }, {
         "category": "Mountain",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "mountain2.jpg",
+        "photographer": "Janez Podnar"
     }, {
         "category": "Mountain",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "mountain3.jpg",
+        "photographer": "Pixabay"
     }, {
         "category": "Mountain",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "mountain4.jpg",
+        "photographer": "Albert White"
     }, {
         "category": "Mountain",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "mountain5.jpg",
+        "photographer": "Tim Gouw"
     }, {
         "category": "Mountain",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "mountain6.jpg",
+        "photographer": "Pixabay"
     }, {
         "category": "Mountain",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "mountain7.jpg",
+        "photographer": "Archie Binamira"
     }, {
         "category": "Beach",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "beach1.jpg",
+        "photographer": "Pixabay"
     }, {
         "category": "Beach",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "beach2.jpg",
+        "photographer": "Asad Photo Maldives"
     }, {
         "category": "Beach",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "beach3.jpg",
+        "photographer": "Pok Rie"
     }, {
         "category": "Beach",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "beach4.jpg",
+        "photographer": "Asad Photo Maldives"
     }, {
         "category": "Beach",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "beach5.jpg",
+        "photographer": "Fabian Wiktor"
     }, {
         "category": "Beach",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "beach6.jpg",
+        "photographer": "Pixabay"
     }, {
         "category": "Beach",
-        "fileName": "",
-        "photographer": ""
+        "fileName": "beach7.jpg",
+        "photographer": "Nathan Cowley"
     }, {
         "category": "Lake",
         "fileName": "",
@@ -109,6 +109,34 @@
         "photographer": ""
     }, {
         "category": "Forest",
+        "fileName": "",
+        "photographer": ""
+    }, {
+        "category": "Sky",
+        "fileName": "",
+        "photographer": ""
+    }, {
+        "category": "Sky",
+        "fileName": "",
+        "photographer": ""
+    }, {
+        "category": "Sky",
+        "fileName": "",
+        "photographer": ""
+    }, {
+        "category": "Sky",
+        "fileName": "",
+        "photographer": ""
+    }, {
+        "category": "Sky",
+        "fileName": "",
+        "photographer": ""
+    }, {
+        "category": "Sky",
+        "fileName": "",
+        "photographer": ""
+    }, {
+        "category": "Sky",
         "fileName": "",
         "photographer": ""
     }

@@ -15,6 +15,7 @@
           <option value="Mountain">Mountain</option>
           <option value="Beach">Beach</option>
           <option value="Lake">Lake</option>
+          <option value="Sky">Sky</option>
           <option value="Random">Random</option>
         </select>
 
@@ -55,7 +56,7 @@
             </div>
         </div>
 
-        <button class="save" v-on:click="saveAndRender">Save and Render</button>
+        <button class="save" v-on:click="saveAndRender">Save and Update</button>
         {{info}}
     </div>
 
@@ -74,11 +75,14 @@
         </div>
 
         <button class="edit" v-on:click="switchToEdit">Edit your page</button>
+        <p>Photo by {{backgroundPhotographer}} from Pexels</p>
 
     </div>
 </template>
 
 <script>
+    import backgrounds from "./util/background.json";
+
     export default {
         name: 'App',
         data () {
@@ -86,6 +90,9 @@
             date: new Date().toDateString(),
             time: '',
             weather: {},
+            possibleBgs: [],
+            backgroundIndex: '',
+            backgroundPhotographer: '',
             tempEdit: false,
             tempIndexToEdit: 0,
             tempShortcutName: '',
@@ -108,9 +115,17 @@
             if (JSON.parse(localStorage.getItem("info"))) {
               this.info = JSON.parse(localStorage.getItem("info"))
             }
-
+            
             if (this.info.background !== "" && this.info.inputRecieved) {
-                document.body.style.backgroundImage = 'url("assets/logo.png")';
+                if (this.info.background == "Random") {
+                    this.possibleBgs = backgrounds;
+                    this.backgroundIndex = Math.floor(Math.random() * 35);
+                } else {
+                    this.possibleBgs = backgrounds.filter(background => background.category == this.info.background);
+                    this.backgroundIndex = Math.floor(Math.random() * 7);
+                }
+                this.backgroundPhotographer = this.possibleBgs[this.backgroundIndex].photographer;
+                document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("assets/${this.possibleBgs[this.backgroundIndex].fileName}")`;
             } else {
                 document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
             }
@@ -127,10 +142,15 @@
         },
         updated: function() {
             if (this.info.background !== "" && this.info.inputRecieved) {
-                console.log("were in")
-                document.body.style.backgroundImage = 'url("https://unsplash.com/photos/tvleqH3p1os")';
-                // document.body.style.backgroundSize = "cover";
-                // background-size: cover;
+                if (this.info.background == "Random") {
+                    this.possibleBgs = backgrounds;
+                    this.backgroundIndex = Math.floor(Math.random() * 35);
+                } else {
+                    this.possibleBgs = backgrounds.filter(background => background.category == this.info.background);
+                    this.backgroundIndex = Math.floor(Math.random() * 7);
+                }
+                this.backgroundPhotographer = this.possibleBgs[this.backgroundIndex].photographer;
+                document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("assets/${this.possibleBgs[this.backgroundIndex].fileName}")`;
             } else {
                 document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
             }
@@ -195,9 +215,13 @@
 
 <style>
     html, body {
-      height: 100%;
-      margin: 0px !important;
-      overflow: hidden;
+        height: 100%;
+        margin: 0px !important;
+        overflow: hidden;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
     }
     #app {
         font-family: 'Montserrat', sans-serif !important;
@@ -253,7 +277,4 @@
     .dropdown:hover .dropdownContent{
       display: block;
     }
-    /* .displayPage {
-      background-image: url("./assets/logo.png");
-    } */
 </style>
