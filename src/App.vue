@@ -10,7 +10,7 @@
         <input type="text" class="zipcode" v-model="info.zipcode"/>
 
         <label for="backgroundPref">Background Preference</label>
-        <select name="backgroundPref" id="backgroundPref" v-model="info.background">
+        <select name="backgroundPref" class="backgroundPref" v-model="info.background">
           <option value="Forest">Forest</option>
           <option value="Mountain">Mountain</option>
           <option value="Beach">Beach</option>
@@ -29,7 +29,7 @@
                       <a href="#" :id="shortcut.name" v-on:click="displayEditShortcut">Edit</a>
                     </div>
                 </div>
-                <a :href="shortcut.url">
+                <a class="shortcutAnchor" :href="shortcut.url">
                     <div>
                         <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
                         <h3>{{shortcut.name}}</h3>
@@ -57,7 +57,6 @@
         </div>
 
         <button class="save" v-on:click="saveAndRender">Save and Update</button>
-        {{info}}
     </div>
 
 
@@ -230,10 +229,36 @@
         text-align: center;
         color: white;
     }
+
+    /* INPUT PAGE */
     .inputHeader {
         font-family: 'Montserrat', sans-serif !important;
         margin: 50px;
         font-size: 40px;
+    }
+
+    .name, .zipcode, .backgroundPref {
+        margin: 10px auto 30px;
+        display: block;
+    }
+
+    .backgroundPref option {
+      padding: 30px;
+    }
+
+    label {
+      font-size: 18px;
+    }
+    /* .backgroundPref {
+
+    } */
+
+    .shortcutSection {
+      display: flex;
+      margin: 20px auto;
+      justify-content: space-evenly;
+      flex-wrap: wrap;
+      max-width: 50%;
     }
     .shortcutModal {
         display: none; /* Hidden by default */
@@ -277,4 +302,6 @@
     .dropdown:hover .dropdownContent{
       display: block;
     }
+
+    /* DISPLAY PAGE */
 </style>
