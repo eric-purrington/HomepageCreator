@@ -23,7 +23,7 @@
         <div class="shortcutSection">
             <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
                 <div class="dropdown">
-                    <i class="fas fa-ellipsis-v"></i>
+                    <i class="fas fa-ellipsis-v fa-lg"></i>
                     <div class="dropdownContent">
                       <a href="#" :id="shortcut.name" v-on:click="removeShortcut">Remove</a>
                       <a href="#" :id="shortcut.name" v-on:click="displayEditShortcut">Edit</a>
@@ -31,14 +31,15 @@
                 </div>
                 <a class="shortcutAnchor" :href="shortcut.url">
                     <div>
-                        <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
-                        <h3>{{shortcut.name}}</h3>
+                        <img class="shortcutIcon" :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
+                        <p v-if="shortcut.name.length < 10" class="shortcutName">{{shortcut.name}}</p>
+                        <p v-if="shortcut.name.length >= 10" class="shortcutName">{{shortcut.name.substring(0, 9)}}...</p>
                     </div>
                 </a>
             </div>
-        
-            <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
         </div>
+
+        <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
 
         <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
             <div class="modalContent">
@@ -242,8 +243,9 @@
         display: block;
     }
 
-    .backgroundPref option {
-      padding: 30px;
+    .backgroundPref {
+      /* padding: 30px; */
+      margin-bottom: 30px;
     }
 
     label {
@@ -255,7 +257,7 @@
 
     .shortcutSection {
       display: flex;
-      margin: 20px auto;
+      margin: 30px auto;
       justify-content: space-evenly;
       flex-wrap: wrap;
       max-width: 50%;
@@ -283,10 +285,45 @@
     }
     .shortcutCard {
       display: inline-block;
+      background-color: white;
+      padding: 10px;
+      border-radius: 20px;
+      width: 125px;
+      /* flex-grow: 1;
+      flex-shrink: 1; */
+      /* margin: 20px; */
+    }
+    .shortcutIcon {
+      height: 35px;
+      margin: 5px;
+    }
+    .shortcutName {
+      margin: 5px;
+    }
+    .addShortcut {
+      border-radius: 20px;
+      color: rgb(87, 0, 75);
+      background-color: white;
+      padding: 10px;
+      display: block;
+      margin: 10px auto;
+    }
+    .save {
+      border-radius: 20px;
+      font-size: 20px;
+      padding: 20px;
+      font-family: 'Montserrat', sans-serif !important;
+      color: rgb(87, 0, 75);
+      margin: 10px;
+      background-color: white;
+      /* color: white; */
     }
     .dropdown {
       position: relative;
       display: inline-block;
+      left: 50%;
+      bottom: 5%;
+      color: rgb(87, 0, 75);
     }
     .dropdownContent {
       display: none;
