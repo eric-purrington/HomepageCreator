@@ -23,10 +23,10 @@
         <div class="shortcutSection">
             <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
                 <div class="dropdown">
-                    <i class="fas fa-ellipsis-v fa-lg"></i>
+                    <i class="fas fa-ellipsis-v"></i>
                     <div class="dropdownContent">
-                      <a href="#" :id="shortcut.name" v-on:click="removeShortcut">Remove</a>
-                      <a href="#" :id="shortcut.name" v-on:click="displayEditShortcut">Edit</a>
+                      <a class="removeShorty" href="#" :id="shortcut.name" v-on:click="removeShortcut">Remove</a>
+                      <a class="editShorty" href="#" :id="shortcut.name" v-on:click="displayEditShortcut">Edit</a>
                     </div>
                 </div>
                 <a class="shortcutAnchor" :href="shortcut.url">
@@ -37,16 +37,17 @@
                     </div>
                 </a>
             </div>
+            <button class="shortcutCard" v-if="info.links.length !== 10" id="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
         </div>
 
-        <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
+        <!-- <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button> -->
 
         <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
             <div class="modalContent">
                 <h3 v-if="!tempEdit">Add Shortcut</h3>
                 <h3 v-if="tempEdit">Edit Shortcut</h3>
-                <label for="shortcutName">Name</label>
-                <input type="text" class="shortcutName" v-model="tempShortcutName"/>
+                <label for="shortcutModName">Name</label>
+                <input type="text" class="shortcutModName" v-model="tempShortcutName"/>
 
                 <label for="shortcutURL">URL</label>
                 <input type="text" class="shortcutURL" placeholder="www.youtube.com" v-model="tempShortcutURL"/>
@@ -64,14 +65,16 @@
     <div class="displayPage" v-if="info.inputRecieved">
         <h1 class="greeting">Hi, {{info.name}}</h1>
 
-        <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
-          <!-- <i v-on:click="updateOrDeleteShortcut" :id="shortcut.name" class="fas fa-ellipsis-v"></i> -->
-          <a :href="shortcut.url">
-            <div>
-              <img :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
-              <h3>{{shortcut.name}}</h3>
+        <div class="shortcutSection">
+            <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
+                <a class="shortcutAnchor" :href="shortcut.url">
+                    <div>
+                        <img class="shortcutIcon" :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
+                        <p v-if="shortcut.name.length < 10" class="shortcutName">{{shortcut.name}}</p>
+                        <p v-if="shortcut.name.length >= 10" class="shortcutName">{{shortcut.name.substring(0, 9)}}...</p>
+                    </div>
+                </a>
             </div>
-          </a>
         </div>
 
         <button class="edit" v-on:click="switchToEdit">Edit your page</button>
@@ -234,26 +237,18 @@
     /* INPUT PAGE */
     .inputHeader {
         font-family: 'Montserrat', sans-serif !important;
-        margin: 50px;
-        font-size: 40px;
+        margin: 30px;
+        /* font-size: 40px; */
     }
 
-    .name, .zipcode, .backgroundPref {
+    .name, .zipcode, .backgroundPref, .shortcutModName, .shortcutURL {
         margin: 10px auto 30px;
         display: block;
     }
 
     .backgroundPref {
-      /* padding: 30px; */
       margin-bottom: 30px;
     }
-
-    label {
-      font-size: 18px;
-    }
-    /* .backgroundPref {
-
-    } */
 
     .shortcutSection {
       display: flex;
@@ -276,37 +271,52 @@
         background-color: rgba(0,0,0,0.75); /* Black w/ opacity */
     }
     .modalContent {
-        background-color: white;
+        background-color: rgb(255, 255, 255);
         color: black;
         margin: auto;
         padding: 20px;
         border-radius: 25px;
+        width: 25%;
+    }
+    .modalContent h3 {
+        font-family: 'Montserrat', sans-serif !important;
+        color: rgb(87, 0, 75);
+    }
+    .shortcutDone, .shortcutCancel {
+        background-color: rgb(87, 0, 75);
+        color: white;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    .shortcutModName, .shortcutURL {
         width: 50%;
     }
     .shortcutCard {
-      display: inline-block;
-      background-color: white;
+      /* display: inline-block; */
+      background-color: #ffffff00;
       padding: 10px;
       border-radius: 20px;
-      width: 125px;
-      /* flex-grow: 1;
-      flex-shrink: 1; */
-      /* margin: 20px; */
+      margin-top: 10px;
+      width: 120px;
+      height: 100px;
+    }
+    .shortcutCard:hover {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+    .shortcutAnchor {
+        color: white;
+    }
+    .shortcutAnchor:visited {
+        color: white;
     }
     .shortcutIcon {
-      height: 35px;
+      height: 30px;
       margin: 5px;
     }
     .shortcutName {
       margin: 5px;
-    }
-    .addShortcut {
-      border-radius: 20px;
-      color: rgb(87, 0, 75);
-      background-color: white;
-      padding: 10px;
-      display: block;
-      margin: 10px auto;
     }
     .save {
       border-radius: 20px;
@@ -316,24 +326,42 @@
       color: rgb(87, 0, 75);
       margin: 10px;
       background-color: white;
-      /* color: white; */
     }
     .dropdown {
       position: relative;
       display: inline-block;
-      left: 50%;
-      bottom: 5%;
-      color: rgb(87, 0, 75);
+      left: 40%;
+      bottom: -15%;
+      color: white;
     }
     .dropdownContent {
       display: none;
       position: absolute;
-      background-color: #f1f1f1;
-      min-width: 160px;
+      background-color: white;
+      min-width: 100px;
       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
       z-index: 1;
+      border-radius: 5px;
+      padding: 5px;
     }
-    .fa-ellipsis-v:hover {
+    .removeShorty, .editShorty {
+      margin: 10px;
+      color: black;
+      display: block;
+    }
+    #addShortcut {
+      border-radius: 20px;
+      color: rgb(87, 0, 75);
+      background-color: white;
+      padding: 10px;
+    }
+    #addShortcut:hover {
+      cursor: pointer;
+    }
+    .removeShorty:visited, .editShorty:visited {
+      color: black;
+    }
+    .fa-ellipsis-v:hover, #addShortcut:hover, .save:hover, .shortcutDone:hover, .shortcutCancel:hover {
       cursor: pointer;
     }
     .dropdown:hover .dropdownContent{
