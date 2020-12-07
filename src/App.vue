@@ -64,9 +64,20 @@
 
     <div class="displayPage" v-if="info.inputRecieved">
         <h1 class="greeting">Hi, {{info.name}}</h1>
+        <h3 class="timeAndDate">{{time}} {{date}}</h3>
+        <div v-if="info.weather !== {}" class="weatherCard">
+          <h4>{{weather}}</h4>
+        </div>
 
         <div class="shortcutSection">
             <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
+                <div class="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                    <div class="dropdownContent">
+                      <a class="removeShorty" href="#" :id="shortcut.name" v-on:click="removeShortcut">Remove</a>
+                      <a class="editShorty" href="#" :id="shortcut.name" v-on:click="displayEditShortcut">Edit</a>
+                    </div>
+                </div>
                 <a class="shortcutAnchor" :href="shortcut.url">
                     <div>
                         <img class="shortcutIcon" :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
@@ -75,10 +86,29 @@
                     </div>
                 </a>
             </div>
+            <button class="shortcutCard" v-if="info.links.length !== 10" id="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
         </div>
 
-        <button class="edit" v-on:click="switchToEdit">Edit your page</button>
-        <p>Photo by {{backgroundPhotographer}} from Pexels</p>
+        <!-- <button v-if="info.links.length !== 10" class="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button> -->
+
+        <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
+            <div class="modalContent">
+                <h3 v-if="!tempEdit">Add Shortcut</h3>
+                <h3 v-if="tempEdit">Edit Shortcut</h3>
+                <label for="shortcutModName">Name</label>
+                <input type="text" class="shortcutModName" v-model="tempShortcutName"/>
+
+                <label for="shortcutURL">URL</label>
+                <input type="text" class="shortcutURL" placeholder="www.youtube.com" v-model="tempShortcutURL"/>
+
+                <button class="shortcutDone" v-on:click="addOrEditShortcut">Done</button>
+
+                <button class="shortcutCancel" value="shortcutCancel" v-on:click="onClick">Cancel</button>
+            </div>
+        </div>
+
+        <button class="edit" v-on:click="switchToEdit"><i class="fas fa-pen"></i> Customize</button>
+        <p class="photoCred">Photo by {{backgroundPhotographer}} from Pexels</p>
 
     </div>
 </template>
@@ -119,57 +149,30 @@
               this.info = JSON.parse(localStorage.getItem("info"))
             }
             
-            if (this.info.background !== "" && this.info.inputRecieved) {
-                if (this.info.background == "Random") {
-                    this.possibleBgs = backgrounds;
-                    this.backgroundIndex = Math.floor(Math.random() * 35);
-                } else {
-                    this.possibleBgs = backgrounds.filter(background => background.category == this.info.background);
-                    this.backgroundIndex = Math.floor(Math.random() * 7);
-                }
-                this.backgroundPhotographer = this.possibleBgs[this.backgroundIndex].photographer;
-                document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("assets/${this.possibleBgs[this.backgroundIndex].fileName}")`;
-            } else {
-                document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
-            }
+            this.styleBackground();
 
             window.addEventListener('click', this.onClick);
-            // if (this.info.zipcode.length === 5 ) {
-            //     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&appid=${process.env.VUE_APP_WEATHER_API}`)
-            //         .then(response => response.json())
-            //         .then(data => this.info.weather = data)
-            // } 
+            // this.fetchWeather(); 
         },
         beforeUnmount: function() {
             window.removeEventListener('click', this.onClick);
         },
         updated: function() {
-            if (this.info.background !== "" && this.info.inputRecieved) {
-                if (this.info.background == "Random") {
-                    this.possibleBgs = backgrounds;
-                    this.backgroundIndex = Math.floor(Math.random() * 35);
-                } else {
-                    this.possibleBgs = backgrounds.filter(background => background.category == this.info.background);
-                    this.backgroundIndex = Math.floor(Math.random() * 7);
-                }
-                this.backgroundPhotographer = this.possibleBgs[this.backgroundIndex].photographer;
-                document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("assets/${this.possibleBgs[this.backgroundIndex].fileName}")`;
-            } else {
-                document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
-            }
-            // if (this.info.zipcode.length === 5 ) {
-            //     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&appid=${process.env.VUE_APP_WEATHER_API}`)
-            //         .then(response => response.json())
-            //         .then(data => this.info.weather = data)
-            // } 
+
         },
         methods: {
             saveAndRender: function() {
-                this.info.inputRecieved = true
+                this.info.inputRecieved = true;
+
+                this.styleBackground();
+
                 localStorage.setItem("info", JSON.stringify(this.info));
+
+                // this.fetchWeather(); 
             },
             switchToEdit: function() {
               this.info.inputRecieved = false
+              this.styleBackground();
             },
             addOrEditShortcut: function() {
               let fullURL = "https://" + this.tempShortcutURL
@@ -188,6 +191,7 @@
                         }
                         this.tempEdit = false
                         this.$refs["shortcutModal"].style.display = "none";
+                        localStorage.setItem("info", JSON.stringify(this.info));
                     })
             },
             onClick: function(event) {
@@ -211,6 +215,30 @@
             removeShortcut: function(event) {
                 let indexToRemove = this.info.links.findIndex(i => i.name === event.target.id);
                 this.info.links.splice(indexToRemove, 1);
+                localStorage.setItem("info", JSON.stringify(this.info));
+            },
+            styleBackground: function() {
+                if (this.info.background !== "" && this.info.inputRecieved) {
+                    if (this.info.background == "Random") {
+                        this.possibleBgs = backgrounds;
+                        this.backgroundIndex = Math.floor(Math.random() * 35);
+                    } else {
+                        this.possibleBgs = backgrounds.filter(background => background.category == this.info.background);
+                        this.backgroundIndex = Math.floor(Math.random() * 7);
+                    }
+                    this.backgroundPhotographer = this.possibleBgs[this.backgroundIndex].photographer;
+                    document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("assets/${this.possibleBgs[this.backgroundIndex].fileName}")`;
+                } else {
+                    document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
+                }
+            },
+            fetchWeather: function() {
+                if (this.info.zipcode.length === 5 ) {
+                    console.log("fetching")
+                    fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&units=imperial&appid=${process.env.VUE_APP_WEATHER_API}`)
+                        .then(response => response.json())
+                        .then(data => this.weather = data)
+                }
             }
         }
     }
@@ -221,11 +249,12 @@
         height: 100%;
         margin: 0px !important;
         overflow: hidden;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
         position: relative;
     }
+
     #app {
         font-family: 'Montserrat', sans-serif !important;
         -webkit-font-smoothing: antialiased;
@@ -238,7 +267,6 @@
     .inputHeader {
         font-family: 'Montserrat', sans-serif !important;
         margin: 30px;
-        /* font-size: 40px; */
     }
 
     .name, .zipcode, .backgroundPref, .shortcutModName, .shortcutURL {
@@ -247,34 +275,33 @@
     }
 
     .backgroundPref {
-      margin-bottom: 30px;
+        margin-bottom: 30px;
     }
 
     .shortcutSection {
-      display: flex;
-      margin: 30px auto;
-      justify-content: space-evenly;
-      flex-wrap: wrap;
-      max-width: 50%;
+        display: flex;
+        margin: 30px auto;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+        max-width: 50%;
     }
     .shortcutModal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        padding-top: 100px; /* Location of the box */
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
         left: 0;
         top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgb(0,0,0); /* Fallback color */
-        background-color: rgba(0,0,0,0.75); /* Black w/ opacity */
+        width: 100%;
+        height: 100%;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.75);
     }
     .modalContent {
         background-color: rgb(255, 255, 255);
         color: black;
         margin: auto;
-        padding: 20px;
+        padding: 10px;
         border-radius: 25px;
         width: 25%;
     }
@@ -319,6 +346,7 @@
       margin: 5px;
     }
     .save {
+      border: none;
       border-radius: 20px;
       font-size: 20px;
       padding: 20px;
@@ -350,13 +378,14 @@
       display: block;
     }
     #addShortcut {
+      border: none;
       border-radius: 20px;
       color: rgb(87, 0, 75);
       background-color: white;
       padding: 10px;
     }
-    #addShortcut:hover {
-      cursor: pointer;
+    .fa-plus {
+      margin: 5px;
     }
     .removeShorty:visited, .editShorty:visited {
       color: black;
