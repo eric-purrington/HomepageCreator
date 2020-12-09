@@ -1,12 +1,15 @@
 <template>
     <div class="displayPage">
-        <h1 class="greeting">Hi, {{info.name}}</h1>
+        
+        <h1 v-if="timeEasy >= 5 && timeEasy < 12" class="greeting">Good Morning, {{info.name}}</h1>
+        <h1 v-if="timeEasy >= 12 && timeEasy < 18" class="greeting">Good Afternoon, {{info.name}}</h1>
+        <h1 v-if="timeEasy >= 18 || timeEasy < 5" class="greeting">Good Evening, {{info.name}}</h1>
         <h2 class="date">{{date}}</h2>
         <h2 class="time">{{time}}</h2>
         
-        <h3 class="timeAndDate">{{time}} {{date}}</h3>
         <div v-if="hasWeather" class="weatherCard">
-          <h4>{{weather.main.temp}}&deg; {{weather.name}}</h4>
+          <p>{{weather.main.temp}}&deg; {{weather.name}}</p>
+          <p>{{weather.weather[0].description}}</p>
         </div>
 
         <div class="shortcutSection">
@@ -83,6 +86,7 @@
           return {
             date: new Date().toDateString(),
             time: '',
+            timeEasy: '',
             weather: {},
             hasWeather: false,
             possibleBgs: [],
@@ -120,8 +124,17 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
+
                 if (this.time[0] == "0") {
-                  this.time = this.time.substring(1, this.time.length)
+                    this.time = this.time.substring(1, this.time.length)
+                }
+
+                this.timeEasy = new Date().toLocaleTimeString('en-US', {
+                    hour12: false, 
+                    hour: '2-digit'
+                });
+                if (this.timeEasy[0] == "0") {
+                    this.timeEasy = parseInt(this.timeEasy.substring(1, this.timeEasy.length))
                 }
             }, 1000);
 
@@ -299,7 +312,7 @@
         padding: 10px;
         border-radius: 20px;
         margin-top: 10px;
-        width: 100px;
+        width: 120px;
         height: 100px;
     }
     .shortcutCard:hover {
@@ -353,7 +366,7 @@
         padding: 10px;
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.25);
     }
-    #addShortcut:hover {
+    #addShortcut:hover, .edit:hover {
         color: rgb(51, 51, 51);
         background-color: white;
     }
@@ -381,10 +394,6 @@
     .edit i {
         margin: 0px 5px;
     }
-    .edit:hover {
-        color: rgb(51, 51, 51);
-        background-color: white;
-    }
     .photoCred{
         position: absolute;
         bottom: 5%;
@@ -394,5 +403,33 @@
         position: absolute;
         top: 1%;
         right: 1%;
+    }
+    .weatherCard {
+        display: inline-block;
+        background-color:white;
+        color: rgb(51, 51, 51);
+        padding: 20px;
+        border-radius: 20px;
+        transition-duration: 2s;
+    }
+    .weatherCard:hover {
+      transform: scale(2);
+      transition-duration: 2s;
+    }
+    .weatherCard:hover p {
+      transform: scale(0.5);
+      transition-duration: 2s;
+    }
+    .greeting {
+      font-size: 48px;
+      margin-top: 50px;
+    }
+    .date, .time {
+      font-size: 24px;
+    }
+    .weatherCard p {
+      font-size: 16px;
+      margin: 10px;
+      transition-duration: 2s;
     }
 </style>
