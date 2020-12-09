@@ -60,8 +60,11 @@
 
     <div class="displayPage">
         <h1 class="greeting">Hi, {{info.name}}</h1>
+        <h2 class="date">{{date}}</h2>
+        <h2 class="time">{{time}}</h2>
+        
         <h3 class="timeAndDate">{{time}} {{date}}</h3>
-        <div v-if="info.weather !== {}" class="weatherCard">
+        <div v-if="weather[0] == 'coord'" class="weatherCard">
           <h4>{{weather}}</h4>
         </div>
 
@@ -85,7 +88,7 @@
             <button class="shortcutCard" v-if="info.links.length !== 10" id="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
         </div>
 
-        <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
+        <div v-if="openShortcutModal" id="shortcutModal" class="shortcutModal" ref="shortcutModal">
             <div class="modalContent">
                 <h3 v-if="!tempEdit">Add Shortcut</h3>
                 <h3 v-if="tempEdit">Edit Shortcut</h3>
@@ -120,14 +123,13 @@
                 </select>
 
                 <button class="shortcutDone" v-on:click="closePrefModal">Done</button>
-
-                <button class="shortcutCancel" value="shortcutCancel" v-on:click="cancelPrefModal">Cancel</button>
             </div>
         </div>
 
         <button class="edit" v-on:click="switchToEdit"><i class="fas fa-pen"></i> Customize</button>
         <p class="photoCred">Photo by {{backgroundPhotographer}} from Pexels</p>
-
+        <p class="tabCount">You've created {{tabCount}} tabs.</p>
+        {{info}}
     </div>
 </template>
 
@@ -149,6 +151,8 @@
             tempShortcutName: '',
             tempShortcutURL: '',
             tempShortcutFavicon: '',
+            openShortcutModal: false,
+            tabCount: 0,
             info: {
               inputRecieved: false,
               name: '',
@@ -159,14 +163,30 @@
           }
         },
         mounted: function() {
+            // How many tabs do you open??
+            if (!JSON.parse(localStorage.getItem("tabCount"))) {
+              this.tabCount = 1;
+              JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
+            } else {
+              this.tabCount = JSON.parse(localStorage.getItem("tabCount"));
+              this.tabCount++;
+              JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
+            }
+
             setInterval(() => {
-                this.time = new Date().toLocaleTimeString();
+                this.time = new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                if (this.time[0] == "0") {
+                  this.time = this.time.substring(1, this.time.length)
+                }
             }, 1000);
 
             if (JSON.parse(localStorage.getItem("info"))) {
               this.info = JSON.parse(localStorage.getItem("info"))
             }
-            
+            // this.info.tabCount++;
             this.styleBackground();
 
             window.addEventListener('click', this.onClick);
@@ -175,23 +195,23 @@
         beforeUnmount: function() {
             window.removeEventListener('click', this.onClick);
         },
-        updated: function() {
+        // updated: function() {
 
-        },
+        // },
         methods: {
-            saveAndRender: function() {
-                this.info.inputRecieved = true;
+            // saveAndRender: function() {
+            //     this.info.inputRecieved = true;
 
-                this.styleBackground();
+            //     this.styleBackground();
 
-                localStorage.setItem("info", JSON.stringify(this.info));
+            //     localStorage.setItem("info", JSON.stringify(this.info));
 
-                // this.fetchWeather(); 
-            },
-            switchToEdit: function() {
-              this.info.inputRecieved = false
-              this.styleBackground();
-            },
+            //     // this.fetchWeather(); 
+            // },
+            // switchToEdit: function() {
+            //   this.info.inputRecieved = false
+            //   this.styleBackground();
+            // },
             addOrEditShortcut: function() {
               let fullURL = "https://" + this.tempShortcutURL
               let fetchEndpoint = fullURL.substring(12, fullURL.length);
@@ -207,23 +227,24 @@
                         } else if (this.tempEdit === true) {
                             this.info.links.splice(this.tempIndexToEdit, 1, {"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
                         }
-                        this.tempEdit = false
-                        this.$refs["shortcutModal"].style.display = "none";
+                        this.tempEdit = false;
+                        this.openShortcutModal = false;
                         localStorage.setItem("info", JSON.stringify(this.info));
                     })
             },
             onClick: function(event) {
                 if(event.target == this.$refs["shortcutModal"] || event.target.value == "shortcutCancel") {
-                    this.$refs["shortcutModal"].style.display = "none";
+                    this.openShortcutModal = false;
                 }
             },
             displayShortcutModal: function() {
                 this.tempShortcutName = "";
                 this.tempShortcutURL = "";
                 this.tempShortcutFavicon = "";
-                this.$refs["shortcutModal"].style.display = "block";
+                this.openShortcutModal = true;
             },
             displayEditShortcut: function(event) {
+                this.openShortcutModal = true;
                 this.tempIndexToEdit = this.info.links.findIndex(i => i.name === event.target.id);
                 this.tempEdit = true
                 this.displayShortcutModal()
@@ -261,11 +282,8 @@
             closePrefModal: function() {
                 this.info.inputRecieved = true;
                 this.styleBackground();
+                this.fetchWeather();
                 localStorage.setItem("info", JSON.stringify(this.info));
-            },
-            cancelPrefModal: function() {
-                this.info.inputRecieved = true;
-                this.styleBackground();
             }
         }
     }
@@ -313,7 +331,7 @@
         max-width: 50%;
     }
     .shortcutModal {
-        display: none;
+        display: block;
         position: fixed;
         z-index: 1;
         padding-top: 100px;
@@ -458,7 +476,7 @@
     .edit {
         position: absolute;
         bottom: 5%;
-        right: 5%;
+        right: 2.5%;
         color: rgb(255, 255, 255);
         background-color: rgb(51, 51, 51);
         padding: 7px;
@@ -477,6 +495,13 @@
     .photoCred{
         position: absolute;
         bottom: 5%;
-        left: 5%;
+        left: 2.5%;
+    }
+    .tabCount {
+        position: absolute;
+        /* align-self: center; */
+        bottom: 2.5%;
+        left: 43.5%;
+        /* margin: 10px auto; */
     }
 </style>
