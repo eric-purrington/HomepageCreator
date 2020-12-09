@@ -1,71 +1,12 @@
 <template>
-    <!-- <div class="inputPage" v-if="!info.inputRecieved">
-        <h1 class="inputHeader">Homepage Creator</h1>
-
-        <label for="name">Display name</label>
-        <input type="text" class="name" v-model="info.name"/>
-
-        <label for="zipcode">Zip code for weather</label>
-        <input type="text" class="zipcode" v-model="info.zipcode"/>
-
-        <label for="backgroundPref">Background Preference</label>
-        <select name="backgroundPref" class="backgroundPref" v-model="info.background">
-          <option value="Forest">Forest</option>
-          <option value="Mountain">Mountain</option>
-          <option value="Beach">Beach</option>
-          <option value="Lake">Lake</option>
-          <option value="Sky">Sky</option>
-          <option value="Random">Random</option>
-        </select>
-
-        <div class="shortcutSection">
-            <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
-                <div class="dropdown">
-                    <i class="fas fa-ellipsis-v"></i>
-                    <div class="dropdownContent">
-                      <a class="removeShorty" href="#" :id="shortcut.name" v-on:click="removeShortcut">Remove</a>
-                      <a class="editShorty" href="#" :id="shortcut.name" v-on:click="displayEditShortcut">Edit</a>
-                    </div>
-                </div>
-                <a class="shortcutAnchor" :href="shortcut.url">
-                    <div>
-                        <img class="shortcutIcon" :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
-                        <p v-if="shortcut.name.length < 10" class="shortcutName">{{shortcut.name}}</p>
-                        <p v-if="shortcut.name.length >= 10" class="shortcutName">{{shortcut.name.substring(0, 9)}}...</p>
-                    </div>
-                </a>
-            </div>
-            <button class="shortcutCard" v-if="info.links.length !== 10" id="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
-        </div>
-
-        <div id="shortcutModal" class="shortcutModal" ref="shortcutModal">
-            <div class="modalContent">
-                <h3 v-if="!tempEdit">Add Shortcut</h3>
-                <h3 v-if="tempEdit">Edit Shortcut</h3>
-                <label for="shortcutModName">Name</label>
-                <input type="text" class="shortcutModName" v-model="tempShortcutName"/>
-
-                <label for="shortcutURL">URL</label>
-                <input type="text" class="shortcutURL" placeholder="www.youtube.com" v-model="tempShortcutURL"/>
-
-                <button class="shortcutDone" v-on:click="addOrEditShortcut">Done</button>
-
-                <button class="shortcutCancel" value="shortcutCancel" v-on:click="onClick">Cancel</button>
-            </div>
-        </div>
-
-        <button class="save" v-on:click="saveAndRender">Save and Update</button>
-    </div> -->
-
-
     <div class="displayPage">
         <h1 class="greeting">Hi, {{info.name}}</h1>
         <h2 class="date">{{date}}</h2>
         <h2 class="time">{{time}}</h2>
         
         <h3 class="timeAndDate">{{time}} {{date}}</h3>
-        <div v-if="weather[0] == 'coord'" class="weatherCard">
-          <h4>{{weather}}</h4>
+        <div v-if="hasWeather" class="weatherCard">
+          <h4>{{weather.main.temp}}&deg; {{weather.name}}</h4>
         </div>
 
         <div class="shortcutSection">
@@ -106,6 +47,7 @@
 
         <div v-if="!info.inputRecieved" id="customizeModal" class="customizeModal" ref="customizeModal">
             <div class="customizeModalContent">
+                <h3>Customize</h3>
                 <label for="name">Display name</label>
                 <input type="text" class="name" v-model="info.name"/>
 
@@ -128,8 +70,7 @@
 
         <button class="edit" v-on:click="switchToEdit"><i class="fas fa-pen"></i> Customize</button>
         <p class="photoCred">Photo by {{backgroundPhotographer}} from Pexels</p>
-        <p class="tabCount">You've created {{tabCount}} tabs.</p>
-        {{info}}
+        <p class="tabCount">{{tabCount}} tabs created!</p>
     </div>
 </template>
 
@@ -143,6 +84,7 @@
             date: new Date().toDateString(),
             time: '',
             weather: {},
+            hasWeather: false,
             possibleBgs: [],
             backgroundIndex: '',
             backgroundPhotographer: '',
@@ -186,32 +128,19 @@
             if (JSON.parse(localStorage.getItem("info"))) {
               this.info = JSON.parse(localStorage.getItem("info"))
             }
-            // this.info.tabCount++;
+            
             this.styleBackground();
 
             window.addEventListener('click', this.onClick);
-            // this.fetchWeather(); 
+            this.fetchWeather(); 
         },
         beforeUnmount: function() {
             window.removeEventListener('click', this.onClick);
         },
-        // updated: function() {
-
-        // },
         methods: {
-            // saveAndRender: function() {
-            //     this.info.inputRecieved = true;
-
-            //     this.styleBackground();
-
-            //     localStorage.setItem("info", JSON.stringify(this.info));
-
-            //     // this.fetchWeather(); 
-            // },
-            // switchToEdit: function() {
-            //   this.info.inputRecieved = false
-            //   this.styleBackground();
-            // },
+            switchToEdit: function() {
+              this.info.inputRecieved = false;
+            },
             addOrEditShortcut: function() {
               let fullURL = "https://" + this.tempShortcutURL
               let fetchEndpoint = fullURL.substring(12, fullURL.length);
@@ -266,17 +195,22 @@
                         this.backgroundIndex = Math.floor(Math.random() * 7);
                     }
                     this.backgroundPhotographer = this.possibleBgs[this.backgroundIndex].photographer;
-                    document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url("assets/${this.possibleBgs[this.backgroundIndex].fileName}")`;
+                    document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("assets/${this.possibleBgs[this.backgroundIndex].fileName}")`;
                 } else {
                     document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
                 }
             },
             fetchWeather: function() {
                 if (this.info.zipcode.length === 5 ) {
-                    console.log("fetching")
                     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&units=imperial&appid=${process.env.VUE_APP_WEATHER_API}`)
                         .then(response => response.json())
-                        .then(data => this.weather = data)
+                        .then(data => {
+                          this.weather = data;
+                          this.hasWeather = true;
+                        });
+                        
+                } else {
+                    this.hasWeather = false;
                 }
             },
             closePrefModal: function() {
@@ -308,12 +242,6 @@
         color: white;
     }
 
-    /* INPUT PAGE */
-    .inputHeader {
-        font-family: 'Montserrat', sans-serif !important;
-        margin: 30px;
-    }
-
     .name, .zipcode, .backgroundPref, .shortcutModName, .shortcutURL {
         margin: 10px auto 30px;
         display: block;
@@ -330,7 +258,7 @@
         flex-wrap: wrap;
         max-width: 50%;
     }
-    .shortcutModal {
+    .shortcutModal, .customizeModal {
         display: block;
         position: fixed;
         z-index: 1;
@@ -342,8 +270,8 @@
         background-color: rgb(0,0,0);
         background-color: rgba(0,0,0,0.75);
     }
-    .modalContent {
-        background-color: rgb(255, 255, 255);
+    .modalContent, .customizeModalContent {
+        background-color: white;
         color: black;
         margin: auto;
         padding: 10px;
@@ -351,35 +279,12 @@
         width: 25%;
     }
 
-
-.customizeModal {
-        position: fixed;
-        z-index: 1;
-        padding-top: 100px;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgb(0,0,0);
-        background-color: rgba(0,0,0,0.75);
-    }
-    .customizeModalContent {
-        background-color: rgb(255, 255, 255);
-        color: black;
-        margin: auto;
-        padding: 10px;
-        border-radius: 25px;
-        width: 25%;
-    }
-
-
-
-    .modalContent h3 {
+    .modalContent h3, .customizeModalContent h3 {
         font-family: 'Montserrat', sans-serif !important;
-        color: rgb(87, 0, 75);
+        color: rgb(51, 51, 51);
     }
     .shortcutDone, .shortcutCancel {
-        background-color: rgb(87, 0, 75);
+        background-color: rgb(51, 51, 51);
         color: white;
         margin: 10px;
         border: none;
@@ -390,46 +295,39 @@
         width: 50%;
     }
     .shortcutCard {
-      /* display: inline-block; */
-      background-color: #ffffff00;
-      padding: 10px;
-      border-radius: 20px;
-      margin-top: 10px;
-      width: 120px;
-      height: 100px;
+        background-color: #ffffff00;
+        padding: 10px;
+        border-radius: 20px;
+        margin-top: 10px;
+        width: 100px;
+        height: 100px;
     }
     .shortcutCard:hover {
-      background-color: rgba(255, 255, 255, 0.25);
-    }
-    .shortcutAnchor {
-        color: white;
-    }
-    .shortcutAnchor:visited {
-        color: white;
+        background-color: rgba(255, 255, 255, 0.25);
     }
     .shortcutIcon {
-      height: 30px;
-      margin: 5px;
+        height: 30px;
+        margin: 5px;
     }
-    .shortcutName {
-      margin: 5px;
+    .shortcutName, .fa-plus {
+        margin: 5px;
     }
     .save {
-      border: none;
-      border-radius: 20px;
-      font-size: 20px;
-      padding: 20px;
-      font-family: 'Montserrat', sans-serif !important;
-      color: rgb(87, 0, 75);
-      margin: 10px;
-      background-color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 20px;
+        padding: 20px;
+        font-family: 'Montserrat', sans-serif !important;
+        color: rgb(51, 51, 51);
+        margin: 10px;
+        background-color: white;
     }
     .dropdown {
-      position: relative;
-      display: inline-block;
-      left: 40%;
-      bottom: -15%;
-      color: white;
+        position: relative;
+        display: inline-block;
+        left: 40%;
+        bottom: -15%;
+        color: white;
     }
     .dropdownContent {
         display: none;
@@ -443,9 +341,9 @@
         padding: 5px;
     }
     .removeShorty, .editShorty {
-      margin: 10px;
-      color: white;
-      display: block;
+        margin: 10px;
+        color: white;
+        display: block;
     }
     #addShortcut {
         border: none;
@@ -456,28 +354,23 @@
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.25);
     }
     #addShortcut:hover {
-        color: rgb(87, 0, 75);
+        color: rgb(51, 51, 51);
         background-color: white;
     }
-    .fa-plus {
-      margin: 5px;
-    }
-    .removeShorty:visited, .editShorty:visited {
-      color: white;
+    .removeShorty:visited, .editShorty:visited, .shortcutAnchor, .shortcutAnchor:visited {
+        color: white;
     }
     .fa-ellipsis-v:hover, #addShortcut:hover, .save:hover, .edit:hover, .shortcutDone:hover, .shortcutCancel:hover {
-      cursor: pointer;
+        cursor: pointer;
     }
     .dropdown:hover .dropdownContent{
-      display: block;
+        display: block;
     }
-
-    /* DISPLAY PAGE */
     .edit {
         position: absolute;
         bottom: 5%;
         right: 2.5%;
-        color: rgb(255, 255, 255);
+        color: white;
         background-color: rgb(51, 51, 51);
         padding: 7px;
         border: none;
@@ -486,11 +379,11 @@
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.25);
     }
     .edit i {
-      margin: 0px 5px;
+        margin: 0px 5px;
     }
     .edit:hover {
-      color: rgb(87, 0, 75);
-      background-color: rgb(255, 255, 255);
+        color: rgb(51, 51, 51);
+        background-color: white;
     }
     .photoCred{
         position: absolute;
@@ -499,9 +392,7 @@
     }
     .tabCount {
         position: absolute;
-        /* align-self: center; */
-        bottom: 2.5%;
-        left: 43.5%;
-        /* margin: 10px auto; */
+        top: 1%;
+        right: 1%;
     }
 </style>
