@@ -7,10 +7,10 @@
         <h2 class="date">{{date}}</h2>
         <h2 class="time">{{time}}</h2>
         
-        <div v-if="hasWeather" class="weatherCard">
+        <a v-if="hasWeather" href="https://www.weather.com" class="weatherLink" ><div class="weatherCard">
           <p>{{weather.main.temp}}&deg; {{weather.name}}</p>
-          <p>{{weather.weather[0].description}}</p>
-        </div>
+          <p>{{weather.weather[0].description.toUpperCase()}}</p>
+        </div></a>
 
         <div class="shortcutSection">
             <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
@@ -266,7 +266,7 @@
 
     .shortcutSection {
         display: flex;
-        margin: 30px auto;
+        margin: 125px auto 25px;
         justify-content: space-evenly;
         flex-wrap: wrap;
         max-width: 50%;
@@ -320,6 +320,9 @@
     }
     .shortcutIcon {
         height: 30px;
+        background-color: rgb(51, 51, 51);
+        padding: 7.5px;
+        border-radius: 20px;
         margin: 5px;
     }
     .shortcutName, .fa-plus {
@@ -372,6 +375,7 @@
     }
     .removeShorty:visited, .editShorty:visited, .shortcutAnchor, .shortcutAnchor:visited {
         color: white;
+        text-decoration: none;
     }
     .fa-ellipsis-v:hover, #addShortcut:hover, .save:hover, .edit:hover, .shortcutDone:hover, .shortcutCancel:hover {
         cursor: pointer;
@@ -405,31 +409,32 @@
         right: 1%;
     }
     .weatherCard {
-        display: inline-block;
-        background-color:white;
-        color: rgb(51, 51, 51);
-        padding: 20px;
+        position: absolute;
+        top: 2.5%;
+        left: 2.5%;
+        color:white;
+        background-color: rgb(51, 51, 51);
+        padding: 15px;
         border-radius: 20px;
-        transition-duration: 2s;
+        /* transition-duration: 2s; */
     }
     .weatherCard:hover {
-      transform: scale(2);
-      transition-duration: 2s;
+      background-color:white;
+      color: rgb(51, 51, 51);
     }
-    .weatherCard:hover p {
+    /* .weatherCard:hover p {
       transform: scale(0.5);
       transition-duration: 2s;
-    }
+    } */
     .greeting {
       font-size: 48px;
-      margin-top: 50px;
+      margin: 50px;
     }
     .date, .time {
       font-size: 24px;
     }
     .weatherCard p {
       font-size: 16px;
-      margin: 10px;
-      transition-duration: 2s;
+      /* margin: 10px; */
     }
 </style>
