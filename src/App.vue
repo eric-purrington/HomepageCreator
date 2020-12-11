@@ -313,7 +313,7 @@
         border-radius: 20px;
         margin-top: 10px;
         width: 120px;
-        height: 100px;
+        height: auto;
     }
     .shortcutCard:hover {
         background-color: rgba(255, 255, 255, 0.25);
