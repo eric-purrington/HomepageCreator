@@ -1,17 +1,19 @@
 <template>
     <div class="displayPage">
-        
+        <!-- Greeting depending on time of day -->
         <h1 v-if="timeEasy >= 5 && timeEasy < 12" class="greeting">Good Morning, {{info.name}}</h1>
         <h1 v-if="timeEasy >= 12 && timeEasy < 18" class="greeting">Good Afternoon, {{info.name}}</h1>
         <h1 v-if="timeEasy >= 18 || timeEasy < 5" class="greeting">Good Evening, {{info.name}}</h1>
         <h2 class="date">{{date}}</h2>
         <h2 class="time">{{time}}</h2>
         
+        <!-- Weather depending on postal code given -->
         <a v-if="hasWeather" href="https://www.weather.com" class="weatherLink" ><div class="weatherCard">
+          <p>{{weather.weather[0].description[0].toUpperCase()}}{{weather.weather[0].description.substring(1, weather.weather[0].description.length)}}</p>
           <p>{{weather.main.temp}}&deg; {{weather.name}}</p>
-          <p>{{weather.weather[0].description.toUpperCase()}}</p>
         </div></a>
 
+        <!-- Shortcut cards displaying name given and favicon if retrievable -->
         <div class="shortcutSection">
             <div v-for="shortcut in info.links" :key="shortcut.name" class="shortcutCard">
                 <div class="dropdown">
@@ -23,7 +25,8 @@
                 </div>
                 <a class="shortcutAnchor" :href="shortcut.url">
                     <div>
-                        <img class="shortcutIcon" :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
+                        <img v-if="shortcut.favicon != ''" class="shortcutIcon" :src="shortcut.favicon" :alt="shortcut.name + ' favicon'"/>
+                        <img v-if="shortcut.favicon == ''" class="shortcutIcon" src="https://via.placeholder.com/900/000000/FFFFFF/?text=Icon" :alt="shortcut.name + ' favicon placeholder'"/>
                         <p v-if="shortcut.name.length < 10" class="shortcutName">{{shortcut.name}}</p>
                         <p v-if="shortcut.name.length >= 10" class="shortcutName">{{shortcut.name.substring(0, 9)}}...</p>
                     </div>
@@ -32,6 +35,7 @@
             <button class="shortcutCard" v-if="info.links.length !== 10" id="addShortcut" v-on:click="displayShortcutModal"><i class="fas fa-plus fa-3x"></i><br>Add Shortcut</button>
         </div>
 
+        <!-- Shortcut modal for editing or adding a shortcut -->
         <div v-if="openShortcutModal" id="shortcutModal" class="shortcutModal" ref="shortcutModal">
             <div class="modalContent">
                 <h3 v-if="!tempEdit">Add Shortcut</h3>
@@ -39,8 +43,10 @@
                 <label for="shortcutModName">Name</label>
                 <input type="text" class="shortcutModName" v-model="tempShortcutName"/>
 
-                <label for="shortcutURL">URL</label>
+                <label for="shortcutURL">Full URL</label>
                 <input type="text" class="shortcutURL" placeholder="www.youtube.com" v-model="tempShortcutURL"/>
+                <p v-if="showUrlError" class="errorMsg">Input valid URL</p>
+                <p v-if="showTryAgain" class="errorMsg">Whoops! Give it another go.</p>
 
                 <button class="shortcutDone" v-on:click="addOrEditShortcut">Done</button>
 
@@ -48,6 +54,7 @@
             </div>
         </div>
 
+        <!-- Input modal -->
         <div v-if="!info.inputRecieved" id="customizeModal" class="customizeModal" ref="customizeModal">
             <div class="customizeModalContent">
                 <h3>Customize</h3>
@@ -71,8 +78,13 @@
             </div>
         </div>
 
+        <!-- Customize button -->
         <button class="edit" v-on:click="switchToEdit"><i class="fas fa-pen"></i> Customize</button>
+
+        <!-- Photo Cred -->
         <p class="photoCred">Photo by {{backgroundPhotographer}} from Pexels</p>
+        
+        <!-- Tab counter for fun -->
         <p class="tabCount">{{tabCount}} tabs created!</p>
     </div>
 </template>
@@ -97,7 +109,9 @@
             tempShortcutName: '',
             tempShortcutURL: '',
             tempShortcutFavicon: '',
+            showUrlError: false,
             openShortcutModal: false,
+            showTryAgain: false,
             tabCount: 0,
             info: {
               inputRecieved: false,
@@ -109,7 +123,7 @@
           }
         },
         mounted: function() {
-            // How many tabs do you open??
+            // Tab counter and saver
             if (!JSON.parse(localStorage.getItem("tabCount"))) {
               this.tabCount = 1;
               JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
@@ -118,7 +132,8 @@
               this.tabCount++;
               JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
             }
-
+            
+            // Keeps time up to... time
             setInterval(() => {
                 this.time = new Date().toLocaleTimeString('en-US', {
                     hour: '2-digit',
@@ -138,42 +153,100 @@
                 }
             }, 1000);
 
+            // Retrieves data from localstorage
             if (JSON.parse(localStorage.getItem("info"))) {
               this.info = JSON.parse(localStorage.getItem("info"))
             }
             
             this.styleBackground();
-
-            window.addEventListener('click', this.onClick);
             this.fetchWeather(); 
+
+            // For closing modals
+            window.addEventListener('click', this.onClick);
         },
         beforeUnmount: function() {
             window.removeEventListener('click', this.onClick);
         },
         methods: {
+            // Opens input modal
             switchToEdit: function() {
               this.info.inputRecieved = false;
             },
+            // Adds or Edits shortcut given modal input
             addOrEditShortcut: function() {
-              let fullURL = "https://" + this.tempShortcutURL
-              let fetchEndpoint = fullURL.substring(12, fullURL.length);
+              this.showUrlError = false;
+              this.showTryAgain = false;
+              let urlObj;
+              let fetchEndpoint;
 
-              fetch(`http://favicongrabber.com/api/grab/${fetchEndpoint}`)
-                    .then(response => response.json())
-                    .then(data => this.tempShortcutFavicon = data.icons[0].src)
-                    .then(() => {
-                        if (this.info.links.length === undefined && this.tempEdit === false) {
-                            this.info.links = [{"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon}]
-                        } else if (this.info.links.length !== undefined && this.tempEdit === false){
-                            this.info.links.push({"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
-                        } else if (this.tempEdit === true) {
-                            this.info.links.splice(this.tempIndexToEdit, 1, {"name": this.tempShortcutName, "url": fullURL, "favicon": this.tempShortcutFavicon});
-                        }
-                        this.tempEdit = false;
-                        this.openShortcutModal = false;
-                        localStorage.setItem("info", JSON.stringify(this.info));
-                    })
+              // Checks to see of URL is real
+              try {
+                urlObj = new URL(this.tempShortcutURL);
+              } catch(e) {
+                console.log(e);
+              }
+
+              // If URL real initiate fetching favicon else display error
+              if (urlObj != undefined) {
+                  if (urlObj.hostname.startsWith("www.")) {
+                      fetchEndpoint = urlObj.hostname.substring(4, urlObj.hostname.length)
+                  } else {
+                      fetchEndpoint = urlObj.hostname;
+                  }
+
+                  // Fetches favicon and saves the links data to info
+                  fetch(`http://favicongrabber.com/api/grab/${fetchEndpoint}`)
+                      .then(response => response.json())
+                      .then(data => this.tempShortcutFavicon = data.icons[0].src)
+                      .then(() => {
+                          if (this.info.links.length === undefined && this.tempEdit === false) {
+                              this.info.links = [{
+                                "name": this.tempShortcutName, 
+                                "url": this.tempShortcutURL, 
+                                "favicon": this.tempShortcutFavicon}]
+                          } else if (this.info.links.length !== undefined && this.tempEdit === false){
+                              this.info.links.push({
+                                "name": this.tempShortcutName, 
+                                "url": this.tempShortcutURL, 
+                                "favicon": this.tempShortcutFavicon});
+                          } else if (this.tempEdit === true) {
+                              this.info.links.splice(this.tempIndexToEdit, 1, {
+                                "name": this.tempShortcutName, 
+                                "url": this.tempShortcutURL, 
+                                "favicon": this.tempShortcutFavicon});
+                          }
+                          this.tempEdit = false;
+                          this.openShortcutModal = false;
+                          localStorage.setItem("info", JSON.stringify(this.info))})
+                      .catch((e) => {
+                          if (e instanceof SyntaxError) {
+                              this.showTryAgain = true;
+                          } else if (e instanceof TypeError) {
+                              if (this.info.links.length === undefined && this.tempEdit === false) {
+                                  this.info.links = [{
+                                    "name": this.tempShortcutName, 
+                                    "url": this.tempShortcutURL, 
+                                    "favicon": ""}]
+                              } else if (this.info.links.length !== undefined && this.tempEdit === false){
+                                  this.info.links.push({"name": this.tempShortcutName, 
+                                  "url": this.tempShortcutURL, 
+                                  "favicon": ""});
+                              } else if (this.tempEdit === true) {
+                                  this.info.links.splice(this.tempIndexToEdit, 1, {
+                                    "name": this.tempShortcutName, 
+                                    "url": this.tempShortcutURL, 
+                                    "favicon": ""});
+                              }
+                              this.tempEdit = false;
+                              this.openShortcutModal = false;
+                              localStorage.setItem("info", JSON.stringify(this.info))
+                          }
+                      });
+              } else {
+                this.showUrlError = true;
+              }
             },
+            // Closes modal on outside click
             onClick: function(event) {
                 if(event.target == this.$refs["shortcutModal"] || event.target.value == "shortcutCancel") {
                     this.openShortcutModal = false;
@@ -198,6 +271,7 @@
                 this.info.links.splice(indexToRemove, 1);
                 localStorage.setItem("info", JSON.stringify(this.info));
             },
+            // Randomly selects background from JSON if preference given else gives standard purple gradient
             styleBackground: function() {
                 if (this.info.background !== "" && this.info.inputRecieved) {
                     if (this.info.background == "Random") {
@@ -213,6 +287,7 @@
                     document.body.style.background = "linear-gradient(0deg, rgb(0, 0, 0) 10%, rgb(87, 0, 75) 50%, rgb(0, 0, 0, 1) 90%)"
                 }
             },
+            // Fetches Weather from openweathermap
             fetchWeather: function() {
                 if (this.info.zipcode.length === 5 ) {
                     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&units=imperial&appid=${process.env.VUE_APP_WEATHER_API}`)
@@ -254,7 +329,7 @@
         text-align: center;
         color: white;
     }
-
+    
     .name, .zipcode, .backgroundPref, .shortcutModName, .shortcutURL {
         margin: 10px auto 30px;
         display: block;
@@ -361,6 +436,9 @@
         color: white;
         display: block;
     }
+    .errorMsg {
+        color: red;
+    }
     #addShortcut {
         border: none;
         border-radius: 20px;
@@ -414,18 +492,13 @@
         left: 2.5%;
         color:white;
         background-color: rgb(51, 51, 51);
-        padding: 15px;
+        padding: 10px;
         border-radius: 20px;
-        /* transition-duration: 2s; */
     }
     .weatherCard:hover {
       background-color:white;
       color: rgb(51, 51, 51);
     }
-    /* .weatherCard:hover p {
-      transform: scale(0.5);
-      transition-duration: 2s;
-    } */
     .greeting {
       font-size: 48px;
       margin: 50px;
@@ -435,6 +508,6 @@
     }
     .weatherCard p {
       font-size: 16px;
-      /* margin: 10px; */
+      margin: 8px !important;
     }
 </style>
