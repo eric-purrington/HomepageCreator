@@ -36,6 +36,7 @@ Vue.js
 ## APIs  
 
 Open Weather Map API
+
 Service API Reference (favicongrabber)    
 
 ## How to Use  
