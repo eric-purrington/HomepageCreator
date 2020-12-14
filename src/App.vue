@@ -44,7 +44,7 @@
                 <input type="text" class="shortcutModName" v-model="tempShortcutName"/>
 
                 <label for="shortcutURL">Full URL</label>
-                <input type="text" class="shortcutURL" placeholder="www.youtube.com" v-model="tempShortcutURL"/>
+                <input type="text" class="shortcutURL" placeholder="https://www.youtube.com" v-model="tempShortcutURL"/>
                 <p v-if="showUrlError" class="errorMsg">Input valid URL</p>
                 <p v-if="showTryAgain" class="errorMsg">Whoops! Give it another go.</p>
 
@@ -329,7 +329,7 @@
         text-align: center;
         color: white;
     }
-    
+
     .name, .zipcode, .backgroundPref, .shortcutModName, .shortcutURL {
         margin: 10px auto 30px;
         display: block;
