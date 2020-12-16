@@ -195,7 +195,7 @@
                   }
 
                   // Fetches favicon and saves the links data to info
-                  fetch(`http://favicongrabber.com/api/grab/${fetchEndpoint}`)
+                  fetch(`https://favicongrabber.com/api/grab/${fetchEndpoint}`)
                       .then(response => response.json())
                       .then(data => this.tempShortcutFavicon = data.icons[0].src)
                       .then(() => {
@@ -261,10 +261,10 @@
             displayEditShortcut: function(event) {
                 this.openShortcutModal = true;
                 this.tempIndexToEdit = this.info.links.findIndex(i => i.name === event.target.id);
-                this.tempEdit = true
-                this.displayShortcutModal()
+                this.tempEdit = true;
+                this.displayShortcutModal();
                 this.tempShortcutName = event.target.id;
-                this.tempShortcutURL = this.info.links[this.tempIndexToEdit].url.substring(8, this.info.links[this.tempIndexToEdit].url.length);
+                this.tempShortcutURL = this.info.links[this.tempIndexToEdit].url;
             },
             removeShortcut: function(event) {
                 let indexToRemove = this.info.links.findIndex(i => i.name === event.target.id);

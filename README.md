@@ -31,7 +31,8 @@ Built in Visual Studio with
 HTML    
 CSS      
 Javascript  
-Vue.js       
+Vue.js    
+[Favicon Maker](https://gauger.io/fonticon/)  
 
 ## APIs  
 
