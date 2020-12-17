@@ -85,7 +85,11 @@
         <p class="photoCred">Photo by {{backgroundPhotographer}} from Pexels</p>
         
         <!-- Tab counter for fun -->
-        <p class="tabCount">{{tabCount}} tabs created!</p>
+        <div class="topRight">
+            <p class="tabCount">{{tabCount}} tabs created!</p>
+            <a class="gmail" href="https://mail.google.com">Gmail</a>
+            <a class="drive" href="https://drive.google.com">Drive</a>
+        </div>
     </div>
 </template>
 
@@ -125,12 +129,12 @@
         mounted: function() {
             // Tab counter and saver
             if (!JSON.parse(localStorage.getItem("tabCount"))) {
-              this.tabCount = 1;
-              JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
+                this.tabCount = 1;
+                JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
             } else {
-              this.tabCount = JSON.parse(localStorage.getItem("tabCount"));
-              this.tabCount++;
-              JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
+                this.tabCount = JSON.parse(localStorage.getItem("tabCount"));
+                this.tabCount++;
+                JSON.stringify(localStorage.setItem("tabCount", this.tabCount))
             }
             
             // Keeps time up to... time
@@ -155,7 +159,7 @@
 
             // Retrieves data from localstorage
             if (JSON.parse(localStorage.getItem("info"))) {
-              this.info = JSON.parse(localStorage.getItem("info"))
+                this.info = JSON.parse(localStorage.getItem("info"))
             }
             
             this.styleBackground();
@@ -170,81 +174,81 @@
         methods: {
             // Opens input modal
             switchToEdit: function() {
-              this.info.inputRecieved = false;
+                this.info.inputRecieved = false;
             },
             // Adds or Edits shortcut given modal input
             addOrEditShortcut: function() {
-              this.showUrlError = false;
-              this.showTryAgain = false;
-              let urlObj;
-              let fetchEndpoint;
+                this.showUrlError = false;
+                this.showTryAgain = false;
+                let urlObj;
+                let fetchEndpoint;
 
-              // Checks to see of URL is real
-              try {
-                urlObj = new URL(this.tempShortcutURL);
-              } catch(e) {
-                console.log(e);
-              }
+                // Checks to see if URL is real
+                try {
+                    urlObj = new URL(this.tempShortcutURL);
+                } catch(e) {
+                    console.log(e);
+                }
 
-              // If URL real initiate fetching favicon else display error
-              if (urlObj != undefined) {
-                  if (urlObj.hostname.startsWith("www.")) {
-                      fetchEndpoint = urlObj.hostname.substring(4, urlObj.hostname.length)
-                  } else {
-                      fetchEndpoint = urlObj.hostname;
-                  }
+                // If URL real initiate fetching favicon else display error
+                if (urlObj != undefined) {
+                    if (urlObj.hostname.startsWith("www.")) {
+                        fetchEndpoint = urlObj.hostname.substring(4, urlObj.hostname.length)
+                    } else {
+                        fetchEndpoint = urlObj.hostname;
+                    }
 
                   // Fetches favicon and saves the links data to info
-                  fetch(`https://favicongrabber.com/api/grab/${fetchEndpoint}`)
-                      .then(response => response.json())
-                      .then(data => this.tempShortcutFavicon = data.icons[0].src)
-                      .then(() => {
-                          if (this.info.links.length === undefined && this.tempEdit === false) {
-                              this.info.links = [{
+                    fetch(`https://favicongrabber.com/api/grab/${fetchEndpoint}`)
+                        .then(response => response.json())
+                        .then(data => this.tempShortcutFavicon = data.icons[0].src)
+                        .then(() => {
+                            if (this.info.links.length === undefined && this.tempEdit === false) {
+                                this.info.links = [{
                                 "name": this.tempShortcutName, 
                                 "url": this.tempShortcutURL, 
                                 "favicon": this.tempShortcutFavicon}]
-                          } else if (this.info.links.length !== undefined && this.tempEdit === false){
-                              this.info.links.push({
+                            } else if (this.info.links.length !== undefined && this.tempEdit === false){
+                                this.info.links.push({
                                 "name": this.tempShortcutName, 
                                 "url": this.tempShortcutURL, 
                                 "favicon": this.tempShortcutFavicon});
-                          } else if (this.tempEdit === true) {
+                            } else if (this.tempEdit === true) {
                               this.info.links.splice(this.tempIndexToEdit, 1, {
                                 "name": this.tempShortcutName, 
                                 "url": this.tempShortcutURL, 
                                 "favicon": this.tempShortcutFavicon});
-                          }
-                          this.tempEdit = false;
-                          this.openShortcutModal = false;
-                          localStorage.setItem("info", JSON.stringify(this.info))})
-                      .catch((e) => {
-                          if (e instanceof SyntaxError) {
-                              this.showTryAgain = true;
-                          } else if (e instanceof TypeError) {
-                              if (this.info.links.length === undefined && this.tempEdit === false) {
-                                  this.info.links = [{
+                            }
+                            this.tempEdit = false;
+                            this.openShortcutModal = false;
+                            localStorage.setItem("info", JSON.stringify(this.info))})
+                        .catch((e) => {
+                            if (e instanceof SyntaxError) {
+                                this.showTryAgain = true;
+                            } else if (e instanceof TypeError) {
+                                if (this.info.links.length === undefined && this.tempEdit === false) {
+                                    this.info.links = [{
                                     "name": this.tempShortcutName, 
                                     "url": this.tempShortcutURL, 
                                     "favicon": ""}]
-                              } else if (this.info.links.length !== undefined && this.tempEdit === false){
-                                  this.info.links.push({"name": this.tempShortcutName, 
-                                  "url": this.tempShortcutURL, 
-                                  "favicon": ""});
-                              } else if (this.tempEdit === true) {
-                                  this.info.links.splice(this.tempIndexToEdit, 1, {
+                                } else if (this.info.links.length !== undefined && this.tempEdit === false){
+                                    this.info.links.push({"name": this.tempShortcutName, 
+                                    "url": this.tempShortcutURL, 
+                                    "favicon": ""});
+                                } else if (this.tempEdit === true) {
+                                    this.info.links.splice(this.tempIndexToEdit, 1, {
                                     "name": this.tempShortcutName, 
                                     "url": this.tempShortcutURL, 
                                     "favicon": ""});
-                              }
-                              this.tempEdit = false;
-                              this.openShortcutModal = false;
-                              localStorage.setItem("info", JSON.stringify(this.info))
-                          }
-                      });
-              } else {
-                this.showUrlError = true;
-              }
+                                }
+                                this.tempEdit = false;
+                                this.openShortcutModal = false;
+                                localStorage.setItem("info", JSON.stringify(this.info))
+                            }
+                        });
+                } else {
+                    this.showUrlError = true;
+                }
             },
             // Closes modal on outside click
             onClick: function(event) {
@@ -293,10 +297,9 @@
                     fetch(`https://api.openweathermap.org/data/2.5/weather?zip=${this.info.zipcode}&units=imperial&appid=${process.env.VUE_APP_WEATHER_API}`)
                         .then(response => response.json())
                         .then(data => {
-                          this.weather = data;
-                          this.hasWeather = true;
-                        });
-                        
+                            this.weather = data;
+                            this.hasWeather = true;
+                        });  
                 } else {
                     this.hasWeather = false;
                 }
@@ -452,7 +455,7 @@
         color: rgb(51, 51, 51);
         background-color: white;
     }
-    .removeShorty:visited, .editShorty:visited, .shortcutAnchor, .shortcutAnchor:visited {
+    .removeShorty:visited, .editShorty:visited, .shortcutAnchor, .shortcutAnchor:visited, .gmail:visited, .drive:visited {
         color: white;
         text-decoration: none;
     }
@@ -483,10 +486,14 @@
         bottom: 5%;
         left: 2.5%;
     }
-    .tabCount {
+    .topRight {
         position: absolute;
-        top: 1%;
-        right: 1%;
+        top: 2.5%;
+        right: 2.5%;
+    }
+    .gmail, .drive {
+        color: white;
+        margin: 10px;
     }
     .weatherCard {
         position: absolute;
