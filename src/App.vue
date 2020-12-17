@@ -421,7 +421,7 @@
         color: white;
     }
     .dropdownContent {
-        display: none;
+        visibility: hidden;
         position: absolute;
         color: white;
         background-color: rgb(51, 51, 51);
@@ -430,6 +430,7 @@
         z-index: 1;
         border-radius: 5px;
         padding: 5px;
+        transition: .35s;
     }
     .removeShorty, .editShorty {
         margin: 10px;
@@ -455,11 +456,12 @@
         color: white;
         text-decoration: none;
     }
-    .fa-ellipsis-v:hover, #addShortcut:hover, .save:hover, .edit:hover, .shortcutDone:hover, .shortcutCancel:hover {
+    #addShortcut:hover, .save:hover, .edit:hover, .shortcutDone:hover, .shortcutCancel:hover {
         cursor: pointer;
     }
-    .dropdown:hover .dropdownContent{
-        display: block;
+    .dropdown:hover .dropdownContent {
+        transition-delay: 0s;
+        visibility: visible;
     }
     .edit {
         position: absolute;
